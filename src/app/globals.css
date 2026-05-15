@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand Colors */
+  --primary-blue: #0b2e84;
+  --primary-red: #f3122f;
+  --primary-gold: #f4b400;
+
+  /* UI Colors */
+  --background: #ffffff;
+  --foreground: #06153a;
+
+  /* Secondary Shades */
+  --muted: #eef2ff;
+  --border: #dbe4ff;
+  --card: #ffffff;
+
+  /* Accent States */
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+}
+
+@theme {
+  /* Core */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Brand */
+  --color-primary: var(--primary-blue);
+  --color-secondary: var(--primary-red);
+  --color-accent: var(--primary-gold);
+
+  /* UI */
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-card: var(--card);
+
+  /* States */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  /* Fonts */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Text */
+  --text-*: initial;
+  --text-xxs: clamp(0.475rem, 1.5vw, 0.55rem);
+  --text-xs: clamp(0.575rem, 1.5vw, 0.75rem);
+  --text-sm: clamp(0.7rem, 1.6vw, 0.875rem);
+  --text-base: clamp(0.75rem, 1.8vw, 1rem);
+  --text-lg: clamp(0.8rem, 1.9vw, 1.125rem);
+  --text-xl: clamp(0.875rem, 2vw, 1.25rem);
+  --text-2xl: clamp(1rem, 2.3vw, 1.5rem);
+  --text-3xl: clamp(1.25rem, 2.6vw, 1.875rem);
+  --text-4xl: clamp(1.5rem, 3vw, 2.25rem);
+  --text-5xl: clamp(1.75rem, 3.5vw, 3rem);
+  --text-6xl: clamp(2rem, 4vw, 3.75rem);
+  --text-7xl: clamp(2.5rem, 5vw, 4.5rem);
+  --text-8xl: clamp(3rem, 6vw, 6rem);
+  --text-9xl: clamp(3.5rem, 7vw, 8rem);
+}
+
+/* Global Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    var(--font-geist-sans),
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
