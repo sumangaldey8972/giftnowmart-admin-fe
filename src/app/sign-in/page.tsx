@@ -4,6 +4,11 @@ import React, { useState } from "react"
 import Image from "next/image"
 import BrandLogo from "@/assets/gift_now_mart_brand_logo.png"
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react"
+import appClient from "@/lib/appClient"
+import { toastLoading, toastUpdate } from "@/utils/toast-message/taost-message"
+import { useAppDispatch } from "@/store/hooks/hooks"
+import { signin } from "@/store/slices/authSlice"
+import { useRouter, useSearchParams } from "next/navigation"
 
 const SignInPage = () => {
     const [showPassword, setShowPassword] = useState(false)
@@ -12,11 +17,58 @@ const SignInPage = () => {
         password: "",
         rememberMe: false
     })
+    const [loading, setLoading] = useState(false)
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const router = useRouter()
+
+    const dispatch = useAppDispatch()
+
+    const searchParams = useSearchParams()
+    const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        // Logic for API call will go here
-        console.log("Authenticating Admin:", formData)
+        setLoading(true)
+        const toastId = toastLoading("Logging you in...", {
+            description: "Checking your credentials, please wait.",
+        });
+
+        let values = {
+            email: formData.email,
+            password: formData.password
+        }
+
+        try {
+            const res = await appClient.post("/api/auth/signin", values);
+            console.log({ res })
+            if (res.data.status) {
+                const user = res.data.user
+                user.accessToken = res.data.accessToken
+                toastUpdate(toastId, "success", "You're signed in", {
+                    description: res.data?.message || "Welcome back!"
+                })
+                setLoading(false)
+
+                if (user.role.length === 0) {
+                    toastUpdate(toastId, "error", "Access denied", {
+                        description: "You do not have permission to access"
+                    })
+
+                    return;
+                }
+
+                dispatch(signin({ user }))
+                // router.replace(callbackUrl)
+            } else {
+                toastUpdate(toastId, "error", "Sign in failed", {
+                    description: res.data?.message || "Something went wrong. Please try again."
+                })
+                setLoading(false)
+            }
+
+        } catch (error) {
+            setLoading(false)
+        }
     }
 
     return (
