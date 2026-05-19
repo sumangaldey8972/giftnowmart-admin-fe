@@ -1,5 +1,6 @@
 "use client";
 
+import BreadCrumbs from "@/components/common/breadcrumbs/bread-crumbs";
 import AdminSidebar from "@/components/common/sidebar";
 
 // import BreadCrumbs from "@/components/common/breadcrumbs/bread-crumbs";
@@ -24,14 +25,14 @@ export default function SidebarLayout({
                 {/* Sticky breadcrumbs with subtle bottom border */}
                 {
                     <header className="sticky top-0 z-10 bg-background">
-                        <div className="px-4 pt-4 pb-2">
-                            {/* <BreadCrumbs /> */}
+                        <div className="px-4 pt-2 pb-2">
+                            <BreadCrumbs />
                         </div>
                     </header>
                 }
 
                 {/* Scrollable content area */}
-                <main className="flex-1 overflow-y-auto bg-background">
+                <main className="flex-1 overflow-y-auto bg-background/95 p-3">
                     {children}
                 </main>
             </div>
