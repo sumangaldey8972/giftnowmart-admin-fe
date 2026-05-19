@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useCallback, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     Plus,
@@ -18,54 +18,73 @@ import {
     X,
     ChevronDown
 } from "lucide-react"
+import appClient from "@/lib/appClient"
+import { toastLoading, toastUpdate } from "@/utils/toast-message/taost-message"
+import { useAppSelector } from "@/store/hooks/hooks"
 
 interface Category {
-    id: string
+    _id: string,
+    catId: string
     name: string
     slug: string
     productCount: number
     isActive: boolean
-    createdAt: string
+    createdAt: string,
+    createdBy: {
+        email: string
+    }
 }
 
-const INITIAL_CATEGORIES: Category[] = [
-    { id: "CAT-001", name: "Luxury Birthday Hampers", slug: "luxury-birthday-hampers", productCount: 142, isActive: true, createdAt: "2026-02-14" },
-    { id: "CAT-002", name: "Corporate Reward Cards", slug: "corporate-reward-cards", productCount: 89, isActive: true, createdAt: "2026-03-01" },
-    { id: "CAT-003", name: "Anniversary Gold Boxes", slug: "anniversary-gold-boxes", productCount: 64, isActive: true, createdAt: "2026-03-12" },
-    { id: "CAT-004", name: "Customized E-Gifts", slug: "customized-e-gifts", productCount: 215, isActive: false, createdAt: "2026-04-02" },
-    { id: "CAT-005", name: "Valentine Premium Wraps", slug: "valentine-premium-wraps", productCount: 38, isActive: true, createdAt: "2026-04-18" },
-    { id: "CAT-006", name: "Wedding Celebration Kits", slug: "wedding-celebration-kits", productCount: 73, isActive: true, createdAt: "2026-04-29" },
-    { id: "CAT-007", name: "Thank You Vouchers", slug: "thank-you-vouchers", productCount: 104, isActive: false, createdAt: "2026-05-01" },
-    { id: "CAT-008", name: "Mother's Day Specials", slug: "mothers-day-specials", productCount: 52, isActive: true, createdAt: "2026-05-10" },
-    { id: "CAT-009", name: "Father's Day Tech Packs", slug: "fathers-day-tech-packs", productCount: 41, isActive: true, createdAt: "2026-05-12" },
-    { id: "CAT-010", name: "Christmas Deluxe Hampers", slug: "christmas-deluxe-hampers", productCount: 310, isActive: true, createdAt: "2026-05-15" },
-    { id: "CAT-001", name: "Luxury Birthday Hampers", slug: "luxury-birthday-hampers", productCount: 142, isActive: true, createdAt: "2026-02-14" },
-    { id: "CAT-002", name: "Corporate Reward Cards", slug: "corporate-reward-cards", productCount: 89, isActive: true, createdAt: "2026-03-01" },
-    { id: "CAT-003", name: "Anniversary Gold Boxes", slug: "anniversary-gold-boxes", productCount: 64, isActive: true, createdAt: "2026-03-12" },
-    { id: "CAT-004", name: "Customized E-Gifts", slug: "customized-e-gifts", productCount: 215, isActive: false, createdAt: "2026-04-02" },
-    { id: "CAT-005", name: "Valentine Premium Wraps", slug: "valentine-premium-wraps", productCount: 38, isActive: true, createdAt: "2026-04-18" },
-    { id: "CAT-006", name: "Wedding Celebration Kits", slug: "wedding-celebration-kits", productCount: 73, isActive: true, createdAt: "2026-04-29" },
-    { id: "CAT-007", name: "Thank You Vouchers", slug: "thank-you-vouchers", productCount: 104, isActive: false, createdAt: "2026-05-01" },
-    { id: "CAT-008", name: "Mother's Day Specials", slug: "mothers-day-specials", productCount: 52, isActive: true, createdAt: "2026-05-10" },
-    { id: "CAT-009", name: "Father's Day Tech Packs", slug: "fathers-day-tech-packs", productCount: 41, isActive: true, createdAt: "2026-05-12" },
-    { id: "CAT-010", name: "Christmas Deluxe Hampers", slug: "christmas-deluxe-hampers", productCount: 310, isActive: true, createdAt: "2026-05-15" },
-]
 
 export default function CategoriesPage() {
-    const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES)
-    const [searchQuery, setSearchQuery] = useState("")
+    const [categories, setCategories] = useState<Category[]>([])
+    const [search, setSearch] = useState("")
     const [selectedIds, setSelectedIds] = useState<string[]>([])
 
     // Dynamic Pagination State & Config Options
-    const [currentPage, setCurrentPage] = useState(1)
-    const [itemsPerPage, setItemsPerPage] = useState(10) // Set default to 10 to demonstrate scrolling immediately
+    const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(10) // Set default to 10 to demonstrate scrolling immediately
     const [isPerPageDropdownOpen, setIsPerPageDropdownOpen] = useState(false)
     const perPageOptions = [5, 10, 20, 50]
+    const [totalDocs, setTotalDocs] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
+
+    const [loading, setLoading] = useState(false)
+    const [createCategoryLoading, setCreateCategoryLoading] = useState(false)
+
+    const user = useAppSelector((store) => store.auth.user)
 
     // Form Overlay Management
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
     const [formData, setFormData] = useState({ name: "", isActive: true })
+
+
+    const handleCategories = useCallback(async () => {
+        setLoading(true)
+        try {
+            const response = await appClient.get("/api/category/get", {
+                params: { search, page, limit }
+            })
+            console.log(response)
+            if (response.data.status) {
+                setCategories(response.data.categories.docs)
+                setTotalDocs(response.data.categories.totalDocs)
+                setTotalPages(response.data.categories.totalPages)
+            }
+
+        } catch (error) {
+            console.log("getting error while category list", error)
+        } finally {
+            setLoading(false)
+        }
+    }, [search, page, limit])
+
+    useEffect(() => {
+        handleCategories()
+    }, [handleCategories])
+
+
 
     // Confirmation Interceptors
     const [confirmAction, setConfirmAction] = useState<{
@@ -74,27 +93,10 @@ export default function CategoriesPage() {
         targetStatus?: boolean
     } | null>(null)
 
-    /* ─── DATAGRID SEARCH QUERY COMPILER ─── */
-    const filteredCategories = useMemo(() => {
-        return categories.filter(cat =>
-            cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            cat.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            cat.slug.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-    }, [categories, searchQuery])
-
-    /* ─── ADAPTIVE PAGINATION PARTITIONER ─── */
-    const paginatedCategories = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage
-        return filteredCategories.slice(startIndex, startIndex + itemsPerPage)
-    }, [filteredCategories, currentPage, itemsPerPage])
-
-    const totalPages = Math.ceil(filteredCategories.length / itemsPerPage)
-
     /* ─── AMENDMENT & MUTATION LOGIC ─── */
-    const handleItemsPerPageChange = (option: number) => {
-        setItemsPerPage(option)
-        setCurrentPage(1) // Snaps view safe layout pointer back to page 1
+    const handlelimitChange = (option: number) => {
+        setLimit(option)
+        setPage(1) // Snaps view safe layout pointer back to page 1
         setIsPerPageDropdownOpen(false)
     }
 
@@ -110,43 +112,128 @@ export default function CategoriesPage() {
         setIsFormOpen(true)
     }
 
-    const handleFormSubmit = (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!formData.name.trim()) return
 
-        if (editingCategory) {
-            setCategories(prev => prev.map(cat =>
-                cat.id === editingCategory.id
-                    ? { ...cat, name: formData.name, slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), isActive: formData.isActive }
-                    : cat
-            ))
-        } else {
-            const newCat: Category = {
-                id: `CAT-${String(categories.length + 1).padStart(3, '0')}`,
-                name: formData.name,
-                slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                productCount: 0,
-                isActive: formData.isActive,
-                createdAt: new Date().toISOString().split('T')[0]
+        setCreateCategoryLoading(true)
+        const toastId = toastLoading("Creating Category...", {
+            description: "Please wait while we create the Category"
+        })
+
+        try {
+            if (editingCategory) {
+                setCategories(prev => prev.map(cat =>
+                    cat.catId === editingCategory._id
+                        ? { ...cat, name: formData.name, slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"), isActive: formData.isActive }
+                        : cat
+                ))
+                const existingCat = {
+                    _id: editingCategory._id,
+                    catId: editingCategory.catId,
+                    name: formData.name,
+                    slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                    isActive: formData.isActive,
+                    createdBy: user?._id
+                }
+
+                console.log({ existingCat })
+
+                const res = await appClient.post("/api/category/update", existingCat)
+
+                if (res?.data.status) {
+                    // toast("success", category ? "Category updated successfully" : "Category created successfully")
+                    toastUpdate(toastId, "success", "Category updation Success", {
+                        description: res.data.message || "Category updation Success"
+                    })
+                    handleCategories()
+                } else {
+
+                    toastUpdate(toastId, "error", "Category updation failed", {
+                        description: res.data.message || "Category updation failed"
+                    })
+                }
+
+            } else {
+                const newCat = {
+                    catId: `CAT-${String(totalDocs).padStart(3, '0')}`,
+                    name: formData.name,
+                    slug: formData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                    isActive: formData.isActive,
+                    createdBy: user?._id
+                }
+
+                const res = await appClient.post("/api/category/create", newCat)
+
+
+                if (res?.data.status) {
+                    // toast("success", category ? "Category updated successfully" : "Category created successfully")
+                    toastUpdate(toastId, "success", "Category creation Success", {
+                        description: res.data.message || "Category creation Success"
+                    })
+                    handleCategories()
+                } else {
+
+                    toastUpdate(toastId, "error", "Category creation failed", {
+                        description: res.data.message || "Category creation failed"
+                    })
+                }
+
             }
-            setCategories(prev => [newCat, ...prev])
+            setIsFormOpen(false)
+        } catch (err: any) {
+            console.error("Error creating category:", err);
+            toastUpdate(toastId, "error", "category creation Failed", {
+                description: err.message || "Failed to publish category"
+            });
         }
-        setIsFormOpen(false)
     }
 
-    const executeConfirmedAction = () => {
+    const executeConfirmedAction = async () => {
         if (!confirmAction) return
 
         const { type, targetId, targetStatus } = confirmAction
 
+        const toastId = toastLoading("Deleting category(s)", {
+            description: `Removing category(s) from the system`
+        })
+
+
         if (type === "delete_single" && targetId) {
-            setCategories(prev => prev.filter(c => c.id !== targetId))
-            setSelectedIds(prev => prev.filter(id => id !== targetId))
+
+            let payload = [targetId]
+
+            let res = await appClient.delete("/api/category/delete", {
+                params: { ids: JSON.stringify(payload) }
+            });
+
+            if (res.data.status) {
+                toastUpdate(toastId, "success", "Category Deleted", {
+                    description: res.data.message || "Category Deleted from the system"
+                })
+                handleCategories()
+            }
+
+
+
         } else if (type === "delete_bulk") {
-            setCategories(prev => prev.filter(c => !selectedIds.includes(c.id)))
-            setSelectedIds([])
+            let payload = selectedIds
+
+            console.log({ payload })
+
+            let res = await appClient.delete("/api/category/delete", {
+                params: { ids: JSON.stringify(payload) }
+            });
+
+            if (res.data.status) {
+                toastUpdate(toastId, "success", "Category Deleted", {
+                    description: res.data.message || "Category Deleted from the system"
+                })
+                handleCategories()
+                setSelectedIds([])
+            }
         } else if (type === "toggle_status" && targetId !== undefined && targetStatus !== undefined) {
-            setCategories(prev => prev.map(c => c.id === targetId ? { ...c, isActive: targetStatus } : c))
+            setCategories(prev => prev.map(c => c.catId === targetId ? { ...c, isActive: targetStatus } : c))
         }
 
         setConfirmAction(null)
@@ -154,7 +241,7 @@ export default function CategoriesPage() {
 
     /* ─── CHECKBOX ROW SELECTIONS ─── */
     const handleSelectAll = () => {
-        const pageIds = paginatedCategories.map(c => c.id)
+        const pageIds = categories.map(c => c._id)
         const allSelected = pageIds.every(id => selectedIds.includes(id))
         if (allSelected) {
             setSelectedIds(prev => prev.filter(id => !pageIds.includes(id)))
@@ -200,8 +287,8 @@ export default function CategoriesPage() {
                     <input
                         type="text"
                         placeholder="Search categories or ID..."
-                        value={searchQuery}
-                        onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                         className="w-full bg-muted/40 text-xs text-foreground placeholder:text-foreground/30 pl-9 pr-4 py-2.5 rounded-xl border border-border focus:outline-none focus:border-primary/40 focus:bg-background transition-all"
                     />
                 </div>
@@ -229,20 +316,20 @@ export default function CategoriesPage() {
                             className="inline-flex items-center gap-1.5 bg-muted/40 border border-border text-foreground/70 text-[11px] font-bold px-3 py-2.5 rounded-xl hover:bg-muted/70 transition-colors"
                         >
                             <SlidersHorizontal className="h-3.5 w-3.5 text-foreground/40" />
-                            <span>Show: {itemsPerPage} per page</span>
+                            <span>Show: {limit} per page</span>
                             <ChevronDown className={`h-3 w-3 text-foreground/40 transition-transform duration-200 ${isPerPageDropdownOpen ? 'rotate-180' : ''}`} />
                         </button>
 
                         <AnimatePresence>
                             {isPerPageDropdownOpen && (
                                 <>
-                                    <div className="fixed inset-0 z-10" onClick={() => setIsPerPageDropdownOpen(false)} />
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsPerPageDropdownOpen(false)} />
                                     <motion.div
                                         initial={{ opacity: 0, y: 6, scale: 0.98 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 6, scale: 0.98 }}
                                         transition={{ duration: 0.15 }}
-                                        className="absolute right-0 mt-1.5 w-40 bg-card border border-border rounded-xl shadow-xl py-1.5 z-30 overflow-hidden"
+                                        className="absolute right-0 mt-1.5 w-40 bg-card border border-border rounded-xl shadow-xl py-1.5 z-20 overflow-hidden"
                                     >
                                         <div className="px-2.5 py-1 border-b border-border/40 mb-1">
                                             <p className="text-[9px] font-extrabold uppercase tracking-wider text-foreground/35">Row Density</p>
@@ -250,14 +337,14 @@ export default function CategoriesPage() {
                                         {perPageOptions.map((option) => (
                                             <button
                                                 key={option}
-                                                onClick={() => handleItemsPerPageChange(option)}
-                                                className={`w-full text-left px-3 py-1.5 text-xs font-bold transition-colors flex items-center justify-between ${itemsPerPage === option
+                                                onClick={() => handlelimitChange(option)}
+                                                className={`w-full text-left px-3 py-1.5 text-xs font-bold transition-colors flex items-center justify-between ${limit === option
                                                     ? "text-primary bg-primary/5"
                                                     : "text-foreground/60 hover:bg-muted/50 hover:text-foreground"
                                                     }`}
                                             >
                                                 <span>{option} Entries</span>
-                                                {itemsPerPage === option && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
+                                                {limit === option && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                             </button>
                                         ))}
                                     </motion.div>
@@ -276,38 +363,38 @@ export default function CategoriesPage() {
                     <table className="w-full text-left border-separate border-spacing-0">
                         <thead>
                             <tr className="text-foreground/40 text-[10px] uppercase font-bold tracking-wider">
-                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 w-12 text-center z-20 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">
+                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 w-12 text-center z-10 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">
                                     <input
                                         type="checkbox"
-                                        checked={paginatedCategories.length > 0 && paginatedCategories.every(c => selectedIds.includes(c.id))}
+                                        checked={categories.length > 0 && categories.every(c => selectedIds.includes(c._id))}
                                         onChange={handleSelectAll}
                                         className="rounded border-border text-primary focus:ring-primary/20 accent-primary h-3.5 w-3.5"
                                     />
                                 </th>
-                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-20 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Category Identifier</th>
-                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-20 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Structural Segment</th>
-                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-20 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Route Slug</th>
-                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 text-center z-20 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Products Loaded</th>
-                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-20 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Deployment Status</th>
-                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 text-right pr-6 z-20 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">System Handlers</th>
+                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-10 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Category Identifier</th>
+                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-10 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Structural Segment</th>
+                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-10 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Route Slug</th>
+                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 text-center z-10 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Products Loaded</th>
+                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 z-10 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">Deployment Status</th>
+                                <th className="sticky top-0 bg-card border-b border-border/60 p-4 text-right pr-6 z-10 shadow-[0_1px_0_0_rgba(219,228,255,0.6)]">System Handlers</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/40 text-xs font-medium bg-card">
-                            {paginatedCategories.length > 0 ? (
-                                paginatedCategories.map((category) => (
+                            {categories.length > 0 ? (
+                                categories.map((category) => (
                                     <tr
-                                        key={category.id}
-                                        className={`hover:bg-muted/20 transition-colors ${selectedIds.includes(category.id) ? "bg-primary/[0.01]" : ""}`}
+                                        key={category._id}
+                                        className={`hover:bg-muted/20 transition-colors ${selectedIds.includes(category._id) ? "bg-primary/[0.01]" : ""}`}
                                     >
                                         <td className="p-4 border-b border-border/30 text-center">
                                             <input
                                                 type="checkbox"
-                                                checked={selectedIds.includes(category.id)}
-                                                onChange={() => handleSelectOne(category.id)}
+                                                checked={selectedIds.includes(category._id)}
+                                                onChange={() => handleSelectOne(category._id)}
                                                 className="rounded border-border text-primary focus:ring-primary/20 accent-primary h-3.5 w-3.5"
                                             />
                                         </td>
-                                        <td className="p-4 border-b border-border/30 font-mono text-foreground/40 font-bold">{category.id}</td>
+                                        <td className="p-4 border-b border-border/30 font-mono text-foreground/40 font-bold">{category.catId}</td>
                                         <td className="p-4 border-b border-border/30 font-bold text-foreground/80">{category.name}</td>
                                         <td className="p-4 border-b border-border/30 font-mono text-[11px] text-foreground/50">{category.slug}</td>
                                         <td className="p-4 border-b border-border/30 text-center">
@@ -319,7 +406,7 @@ export default function CategoriesPage() {
                                             <button
                                                 onClick={() => setConfirmAction({
                                                     type: "toggle_status",
-                                                    targetId: category.id,
+                                                    targetId: category._id,
                                                     targetStatus: !category.isActive
                                                 })}
                                                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border tracking-wider transition-all shadow-sm ${category.isActive
@@ -350,7 +437,7 @@ export default function CategoriesPage() {
                                                     <Edit2 className="h-3.5 w-3.5" />
                                                 </button>
                                                 <button
-                                                    onClick={() => setConfirmAction({ type: "delete_single", targetId: category.id })}
+                                                    onClick={() => setConfirmAction({ type: "delete_single", targetId: category._id })}
                                                     className="p-1.5 rounded-lg border border-border/50 text-foreground/50 hover:text-danger hover:border-danger/30 hover:bg-danger/5 transition-all"
                                                     title="Drop Entry"
                                                 >
@@ -375,16 +462,16 @@ export default function CategoriesPage() {
                 </div>
 
                 {/* ─── PINNED/STICKY FOOTER CONTROLLER ─── */}
-                <div className="sticky bottom-0 left-0 right-0 z-20 flex flex-col sm:flex-row items-center justify-between border-t border-border bg-card p-4 gap-3 shadow-[0_-4px_12px_rgba(11,46,132,0.02)] flex-shrink-0">
+                <div className="sticky bottom-0 left-0 right-0 z-10 flex flex-col sm:flex-row items-center justify-between border-t border-border bg-card p-4 gap-3 shadow-[0_-4px_12px_rgba(11,46,132,0.02)] flex-shrink-0">
                     <span className="text-[11px] font-semibold text-foreground/40">
-                        Showing <strong className="text-foreground/70 font-bold">{paginatedCategories.length}</strong> of <strong className="text-foreground/70 font-bold">{filteredCategories.length}</strong> catalog records
+                        Showing <strong className="text-foreground/70 font-bold">{page}</strong> of <strong className="text-foreground/70 font-bold">{totalPages}</strong> catalog records
                     </span>
 
                     {totalPages > 1 && (
                         <div className="flex items-center gap-1.5">
                             <button
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
+                                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                                disabled={page === 1}
                                 className="p-1.5 rounded-lg border border-border text-foreground/40 hover:text-foreground/80 disabled:opacity-30 disabled:pointer-events-none hover:bg-card transition-all"
                             >
                                 <ChevronLeft className="h-4 w-4" />
@@ -392,8 +479,8 @@ export default function CategoriesPage() {
                             {Array.from({ length: totalPages }).map((_, idx) => (
                                 <button
                                     key={idx}
-                                    onClick={() => setCurrentPage(idx + 1)}
-                                    className={`h-7 w-7 rounded-lg text-xs font-bold transition-all ${currentPage === idx + 1
+                                    onClick={() => setPage(idx + 1)}
+                                    className={`h-7 w-7 rounded-lg text-xs font-bold transition-all ${page === idx + 1
                                         ? "bg-primary text-white shadow-sm shadow-primary/20"
                                         : "border border-border/60 text-foreground/50 hover:bg-card hover:text-foreground"
                                         }`}
@@ -402,8 +489,8 @@ export default function CategoriesPage() {
                                 </button>
                             ))}
                             <button
-                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
+                                onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={page === totalPages}
                                 className="p-1.5 rounded-lg border border-border text-foreground/40 hover:text-foreground/80 disabled:opacity-30 disabled:pointer-events-none hover:bg-card transition-all"
                             >
                                 <ChevronRight className="h-4 w-4" />

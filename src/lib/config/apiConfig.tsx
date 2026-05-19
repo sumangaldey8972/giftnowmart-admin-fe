@@ -8,6 +8,12 @@ type ApiEndPoints = {
         update: string,
         delete: (ids: string[]) => string,
         resetPassword: string
+    },
+    category: {
+        createCategory: string,
+        getCategoryList: (page: string, limit: string, search: string) => string,
+        delete: (ids: string[]) => string,
+        update: string
     }
 }
 
@@ -23,5 +29,11 @@ export const API_ENDPOINTS: ApiEndPoints = {
         update: "/auth/update",
         delete: (ids) => `/auth/delete-users?ids=${encodeURIComponent(JSON.stringify(ids))}`,
         resetPassword: "/auth/reset-password-by-admin"
+    },
+    category: {
+        createCategory: "/category",
+        getCategoryList: (page, limit, search) => `/category?page=${page}&limit=${limit}&search=${search}`,
+        delete: (ids) => `/category?ids=${encodeURIComponent(JSON.stringify(ids))}`,
+        update: "/category/update"
     }
 } 
