@@ -14,7 +14,16 @@ type ApiEndPoints = {
         getCategoryList: (page: string, limit: string, search: string) => string,
         delete: (ids: string[]) => string,
         update: string
-    }
+    },
+    brand: {
+        createBrand: string,
+        getBrandList: (page: string, limit: string, search: string) => string,
+        delete: (ids: string[]) => string,
+        update: string
+    },
+    cloudionary: {
+        brandLogo: string,
+    },
 }
 
 export const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -35,5 +44,15 @@ export const API_ENDPOINTS: ApiEndPoints = {
         getCategoryList: (page, limit, search) => `/category?page=${page}&limit=${limit}&search=${search}`,
         delete: (ids) => `/category?ids=${encodeURIComponent(JSON.stringify(ids))}`,
         update: "/category/update"
-    }
+    },
+    brand: {
+        createBrand: "/brand",
+        getBrandList: (page, limit, search) => `/brand?page=${page}&limit=${limit}&search=${search}`,
+        delete: (ids) => `/brand?ids=${encodeURIComponent(JSON.stringify(ids))}`,
+        update: "/brand/update"
+    },
+    cloudionary: {
+        brandLogo: "/cloudionary/brand-logo",
+    },
+
 } 

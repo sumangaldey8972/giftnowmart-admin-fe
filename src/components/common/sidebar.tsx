@@ -33,6 +33,7 @@ import {
     LayoutGrid,
     ShieldCheck,
     SlidersHorizontal,
+    Store,
 } from "lucide-react"
 import { useAppSelector } from "@/store/hooks/hooks"
 import { UserInterface } from "@/app/interface/user"
@@ -73,6 +74,7 @@ const navGroups: NavGroup[] = [
                     { name: "All Products", href: "/products/all", icon: Layers },
                     { name: "Add New Gift", href: "/products/new", icon: PlusCircle },
                     { name: "Categories", href: "/products/categories", icon: SlidersHorizontal },
+                    { name: "Brands", href: "/products/brands", icon: Store },
                 ],
             },
             { name: "Orders", href: "/orders", icon: ShoppingBag, badge: "12", badgeVariant: "red" },
