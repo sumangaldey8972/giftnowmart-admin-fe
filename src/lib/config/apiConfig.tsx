@@ -21,6 +21,13 @@ type ApiEndPoints = {
         delete: (ids: string[]) => string,
         update: string
     },
+    product: {
+        createProduct: string,
+        getProductList: (page: string, limit: string, search: string) => string,
+        delete: (ids: string[]) => string,
+        update: string,
+        getProductCount: string
+    },
     cloudionary: {
         brandLogo: string,
     },
@@ -50,6 +57,13 @@ export const API_ENDPOINTS: ApiEndPoints = {
         getBrandList: (page, limit, search) => `/brand?page=${page}&limit=${limit}&search=${search}`,
         delete: (ids) => `/brand?ids=${encodeURIComponent(JSON.stringify(ids))}`,
         update: "/brand/update"
+    },
+    product: {
+        createProduct: "/product",
+        getProductList: (page, limit, search) => `/product?page=${page}&limit=${limit}&search=${search}`,
+        delete: (ids) => `/product?ids=${encodeURIComponent(JSON.stringify(ids))}`,
+        update: "/product",
+        getProductCount: "/product/get-product-count"
     },
     cloudionary: {
         brandLogo: "/cloudionary/brand-logo",

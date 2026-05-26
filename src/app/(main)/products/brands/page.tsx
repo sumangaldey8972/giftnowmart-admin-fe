@@ -26,21 +26,7 @@ import Image from "next/image"
 import { getInitials } from "@/utils/helper"
 import ImageUploader from "@/components/common/ImageUploader"
 import { uploadBrandLogo } from "@/cloudionary/uploadBrandLogo"
-
-interface Brand {
-    _id: string,
-    brandId: string
-    name: string
-    slug: string
-    productCount: number,
-    logo: string,
-    isFeatured: boolean,
-    isActive: boolean,
-    createdAt: string,
-    createdBy: {
-        email: string
-    }
-}
+import { Brand } from "@/app/interface/brand"
 
 
 export default function BrandsPage() {

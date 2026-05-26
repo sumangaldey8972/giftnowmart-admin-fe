@@ -72,7 +72,7 @@ const navGroups: NavGroup[] = [
                 icon: Gift,
                 subMenu: [
                     { name: "All Products", href: "/products/all", icon: Layers },
-                    { name: "Add New Gift", href: "/products/new", icon: PlusCircle },
+                    { name: "Add New Gift", href: "/products/manage-product", icon: PlusCircle },
                     { name: "Categories", href: "/products/categories", icon: SlidersHorizontal },
                     { name: "Brands", href: "/products/brands", icon: Store },
                 ],

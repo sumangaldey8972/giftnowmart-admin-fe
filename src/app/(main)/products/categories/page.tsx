@@ -21,20 +21,7 @@ import {
 import appClient from "@/lib/appClient"
 import { toastLoading, toastUpdate } from "@/utils/toast-message/taost-message"
 import { useAppSelector } from "@/store/hooks/hooks"
-
-interface Category {
-    _id: string,
-    catId: string
-    name: string
-    slug: string
-    productCount: number
-    isActive: boolean
-    createdAt: string,
-    createdBy: {
-        email: string
-    }
-}
-
+import { Category } from "@/app/interface/category"
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState<Category[]>([])
