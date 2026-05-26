@@ -16,6 +16,7 @@ import { PriceVariantsInterface } from "@/app/interface/product"
 import CategorySelect from "@/components/common/multiselect/categorySelect"
 import BrandSelect from "@/components/common/multiselect/brandSelect"
 import { useRouter } from "next/navigation"
+import RichTextEditor from "@/components/common/RichTextEditor"
 
 type NavTab = "core" | "classification" | "pricing" | "delivery" | "content" | "visibility"
 
@@ -283,12 +284,22 @@ export default function ProductPage() {
                                         <Input placeholder="Enter product name" value={formData.title} onChange={e => set("title", e.target.value)} required />
                                     </div>
                                     <div className="space-y-1">
-                                        <FieldLabel>Short Summary</FieldLabel>
-                                        <TextArea rows={2} placeholder="A short description shown on item cards" value={formData.shortDescription} onChange={e => set("shortDescription", e.target.value)} />
+                                        <RichTextEditor
+                                            label="Short Summary"
+                                            placeholder="A short description shown on item cards"
+                                            value={formData.shortDescription}
+                                            onChange={val => set("shortDescription", val)}
+                                            minHeight="140px"
+                                        />
                                     </div>
-                                    <div className="space-y-1">
-                                        <FieldLabel>Full Description</FieldLabel>
-                                        <TextArea rows={4} placeholder="A detailed description about features and terms" value={formData.description} onChange={e => set("description", e.target.value)} />
+                                    <div className="space-y-2">
+                                        <RichTextEditor
+                                            label="Full Description"
+                                            placeholder="A detailed description about features and terms"
+                                            value={formData.description}
+                                            onChange={val => set("description", val)}
+                                            minHeight="220px"
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -436,12 +447,22 @@ export default function ProductPage() {
                                         <p className="text-xs text-foreground/50">Provide instructions and terms for the buyers.</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <FieldLabel>How to Redeem Steps</FieldLabel>
-                                        <TextArea rows={3} placeholder="Step 1: Go to the account wallet page..." value={formData.redeemSteps} onChange={e => set("redeemSteps", e.target.value)} />
+                                        <RichTextEditor
+                                            label="How to Redeem Steps"
+                                            placeholder="Step 1: Go to the account wallet page..."
+                                            value={formData.redeemSteps}
+                                            onChange={val => set("redeemSteps", val)}
+                                            minHeight="140px"
+                                        />
                                     </div>
-                                    <div className="space-y-1">
-                                        <FieldLabel>Terms and Conditions</FieldLabel>
-                                        <TextArea rows={3} placeholder="This voucher code cannot be traded or refunded for cash values..." value={formData.termAndConditions} onChange={e => set("termAndConditions", e.target.value)} />
+                                    <div className="space-y-2">
+                                        <RichTextEditor
+                                            label="Terms and Conditions"
+                                            placeholder="This voucher code cannot be traded or refunded for cash values..."
+                                            value={formData.termAndConditions}
+                                            onChange={val => set("termAndConditions", val)}
+                                            minHeight="140px"
+                                        />
                                     </div>
                                 </div>
                             )}
