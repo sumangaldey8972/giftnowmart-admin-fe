@@ -2,13 +2,13 @@ import appClient from "@/lib/appClient";
 
 export const uploadBrandLogo = async (
     file: File,
-    brandId: string,
+    uniqueId: string,
     folderName?: string
 ): Promise<string> => {
 
     // 1️⃣ Get signed upload params
     const sigRes = await appClient.post("/api/signature/brand-logo", {
-        brandId,
+        uniqueId,
         folderName
     });
 
