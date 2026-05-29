@@ -58,7 +58,7 @@ const SignInPage = () => {
                 }
 
                 dispatch(signin({ user }))
-                // router.replace(callbackUrl)
+                router.replace(callbackUrl)
             } else {
                 toastUpdate(toastId, "error", "Sign in failed", {
                     description: res.data?.message || "Something went wrong. Please try again."

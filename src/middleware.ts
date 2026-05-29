@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const cookieHeader = req.headers.get("cookie") || "";
 
-  const publicRoutes = ["/auth/signin", "/auth/signup", "/auth/reset-password"];
+  const publicRoutes = ["/sign-in", "/auth/signup", "/auth/reset-password"];
   const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
 
   if (isPublicRoute && accessToken && !isExpired(accessToken)) {
@@ -61,7 +61,7 @@ export async function middleware(req: NextRequest) {
         }
       }
 
-      const redirectUrl = new URL("/auth/signin", req.url);
+      const redirectUrl = new URL("/sign-in", req.url);
       redirectUrl.searchParams.set(
         "callbackUrl",
         req.nextUrl.pathname + req.nextUrl.search
@@ -74,5 +74,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/dashboard", "/auth/:path*", "/news/:path*", "/request", "/consultation-request", "/ad-server/:path*", "/settings/:path*"],
+  matcher: ["/", "/dashboard", "/sign-in", "/products/:path*"],
 };

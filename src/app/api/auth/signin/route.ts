@@ -7,8 +7,6 @@ export async function POST(req: NextRequest) {
     try {
         const payload = await req.json();
 
-        console.log({ payload })
-
         const backendRes = await apiClient.post(
             API_ENDPOINTS.auth.signin,
             payload
