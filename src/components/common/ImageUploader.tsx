@@ -78,9 +78,9 @@ const ImageUploader = ({
             {/* Upload Area */}
             <div
                 className={`
-                    border-2 border-dashed rounded-lg transition-all duration-300 bg-[#0A0A0A] relative group
+                    border-2 border-dashed rounded-lg transition-all duration-300 bg-background relative group
                     ${!displayImage
-                        ? 'border-[#333] hover:border-[#bf953f] cursor-pointer p-6 text-center'
+                        ? 'border-muted hover:border-primary/60 cursor-pointer p-6 text-center'
                         : 'border-[#bf953f]/40 p-3'
                     }
                 `}

@@ -8,13 +8,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import BrandLogo from "@/assets/gift_now_mart_brand_logo.png"
 import BrandIcon from "@/app/icon.png"
 import {
-    LayoutDashboard,
-    Gift,
-    ShoppingBag,
-    Users,
-    Percent,
-    Settings,
-    ChevronLeft,
     ChevronDown,
     ChevronRight,
     Menu,
@@ -22,86 +15,14 @@ import {
     LogOut,
     Bell,
     Search,
-    User,
-    Shield,
-    Sliders,
-    Layers,
-    PlusCircle,
-    BarChart3,
-    DollarSign,
-    UserCog,
-    LayoutGrid,
     ShieldCheck,
-    SlidersHorizontal,
-    Store,
 } from "lucide-react"
 import { useAppSelector } from "@/store/hooks/hooks"
 import { UserInterface } from "@/app/interface/user"
 import { getInitials } from "@/utils/helper"
+import { NavGroup_, navGroups } from "@/constants/navgroup"
 
-/* ─────────────────── NAV CONFIG ─────────────────── */
 
-type NavItem = {
-    name: string
-    href: string
-    icon: React.ElementType
-    badge?: string
-    badgeVariant?: "red" | "blue" | "amber"
-    subMenu?: { name: string; href: string; icon: React.ElementType }[]
-}
-
-type NavGroup = {
-    label: string
-    items: NavItem[]
-}
-
-const navGroups: NavGroup[] = [
-    {
-        label: "Overview",
-        items: [
-            { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-            { name: "Notifications", href: "/notifications", icon: Bell, badge: "4", badgeVariant: "red" },
-        ],
-    },
-    {
-        label: "Catalog",
-        items: [
-            {
-                name: "Gifts & Products",
-                href: "/products",
-                icon: Gift,
-                subMenu: [
-                    { name: "All Products", href: "/products/all", icon: Layers },
-                    { name: "Add New Gift", href: "/products/manage-product", icon: PlusCircle },
-                    { name: "Categories", href: "/products/categories", icon: SlidersHorizontal },
-                    { name: "Brands", href: "/products/brands", icon: Store },
-                ],
-            },
-            { name: "Orders", href: "/orders", icon: ShoppingBag, badge: "12", badgeVariant: "red" },
-        ],
-    },
-    {
-        label: "People",
-        items: [
-            { name: "Customers", href: "/customers", icon: Users },
-            { name: "Admins", href: "/admins", icon: UserCog },
-        ],
-    },
-    {
-        label: "Growth",
-        items: [
-            { name: "Promotions", href: "/promotions", icon: Percent, badge: "New", badgeVariant: "blue" },
-            { name: "Analytics", href: "/analytics", icon: BarChart3 },
-            { name: "Revenue", href: "/revenue", icon: DollarSign },
-        ],
-    },
-    {
-        label: "System",
-        items: [
-            { name: "Settings", href: "/settings", icon: Settings },
-        ],
-    },
-]
 
 // const user = {
 //     name: "Alex Mercer",
@@ -134,7 +55,7 @@ function NavGroup({
     onToggleSub,
     pathname,
 }: {
-    group: NavGroup
+    group: NavGroup_
     collapsed: boolean
     openSubMenus: Record<string, boolean>
     onToggleSub: (name: string) => void
